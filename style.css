@@ -17,7 +17,9 @@
 
 body {
   margin: 0;
-  background: var(--tinta);
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    var(--tinta) url('img/fondo.svg') repeat;
+  background-size: cover;
   color: var(--arena);
   font-family: 'Work Sans', sans-serif;
   min-height: 100vh;
@@ -37,6 +39,33 @@ h2 { font-size: 1.15rem; color: var(--oro); }
 h3 { font-size: 1.05rem; margin-bottom: 0.3em; }
 
 p { line-height: 1.6; }
+
+#header-logo {
+  height: 250px; /* ajusta el tamaño que quieras */
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+#header-texto {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 4vw, 2.3rem);
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 1rem;;
+}
+
+#site-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+#site-footer {
+  text-align: center;
+  padding: 1rem;
+}
 
 /* --- fondo respirante: el elemento firma de la página --- */
 .fondo-respiracion {
@@ -71,6 +100,7 @@ p { line-height: 1.6; }
   right: -6vw;
   animation-delay: 3.5s;
 }
+
 
 @keyframes respirar {
   0%, 100% { transform: scale(1); opacity: 0.22; }
