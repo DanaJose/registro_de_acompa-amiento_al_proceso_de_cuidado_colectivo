@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-registro · Proceso de acompañamiento</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+<div class="fondo-respiracion" aria-hidden="true">
+  <div class="halo halo-1"></div>
+  <div class="halo halo-2"></div>
+</div>
+ 
+<main class="contenedor">
+ 
+  <div class="progreso" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-label="Progreso del pre-registro">
+    <div class="punto activo" data-punto="1"><span class="punto-label">llegar</span></div>
+    <div class="linea"></div>
+    <div class="punto" data-punto="2"><span class="punto-label">contar</span></div>
+    <div class="linea"></div>
+    <div class="punto" data-punto="3"><span class="punto-label">sentir</span></div>
+  </div>
+ 
+  <!-- HOJA 1 — EXPLICACIÓN -->
+  <section class="hoja activa" id="hoja-1" aria-labelledby="titulo-1">
+    <p class="eyebrow">antes de empezar</p>
+    <h1 id="titulo-1">Este es un espacio para llegar, no para rendir cuentas.</h1>
+    <p class="texto-intro">
+      Este pre-registro es el primer paso del proceso de acompañamiento psicosocial
+      desde el autocuidado. No hay respuestas correctas ni incorrectas — solo un lugar
+      para que quien te acompañe pueda conocer tu contexto antes del primer encuentro.
+    </p>
+ 
+    <div class="tarjeta-info">
+      <h2>Cómo funciona</h2>
+      <ul class="lista-pasos">
+        <li><strong>Contar</strong> — algunas preguntas sobre tu labor, tu historia con procesos de acompañamiento y lo que esperás de este.</li>
+        <li><strong>Sentir</strong> — una guía breve para notar cómo está tu cuerpo hoy, sin diagramas ni imágenes, solo tus propias palabras.</li>
+      </ul>
+      <p class="texto-secundario">
+        Podés tomarte el tiempo que necesites. Podés dejar en blanco lo que no quieras
+        compartir todavía — nada acá es obligatorio salvo donde se indique.
+      </p>
+    </div>
+ 
+    <div class="tarjeta-consentimiento">
+      <label class="checkbox-consentimiento">
+        <input type="checkbox" id="consentimiento" required>
+        <span>
+          Entiendo que esta información va a ser leída por quien me acompañe en este
+          proceso, que queda guardada solo en este dispositivo, y que puedo detenerme
+          en cualquier momento.
+        </span>
+      </label>
+    </div>
+ 
+    <div class="nav-hoja">
+      <span class="nota-nav" id="nota-consentimiento">Marcá la casilla para continuar</span>
+      <button class="btn btn-primario" id="btn-a-hoja-2" disabled>Empezar a contar →</button>
+    </div>
+  </section>
+ 
+  <!-- HOJA 2 — PREGUNTAS -->
+  <section class="hoja" id="hoja-2" aria-labelledby="titulo-2">
+    <p class="eyebrow">contar</p>
+    <h1 id="titulo-2">Tu labor, tu historia, tus expectativas</h1>
+ 
+    <form id="form-preguntas">
+ 
+      <fieldset class="grupo-preguntas">
+        <legend>Tu labor como defensora</legend>
+ 
+        <label class="campo">
+          <span class="campo-label">Organización o colectivo con el que trabajás <em>(opcional)</em></span>
+          <input type="text" name="organizacion" placeholder="Ej: colectivo, ONG, red independiente...">
+        </label>
+ 
+        <label class="campo">
+          <span class="campo-label">¿Hace cuánto tiempo ejercés tu labor como defensora?</span>
+          <input type="text" name="tiempo_labor" placeholder="Ej: 3 años, desde 2019...">
+        </label>
+ 
+        <div class="campo">
+          <span class="campo-label">¿Qué tipo de riesgos enfrentás en tu labor? <em>(marcá los que apliquen)</em></span>
+          <div class="grid-checkbox">
+            <label class="chip"><input type="checkbox" name="riesgo" value="digital"> Digital / vigilancia</label>
+            <label class="chip"><input type="checkbox" name="riesgo" value="fisico"> Físico</label>
+            <label class="chip"><input type="checkbox" name="riesgo" value="judicial"> Judicial / legal</label>
+            <label class="chip"><input type="checkbox" name="riesgo" value="mediatico"> Mediático / estigmatización</label>
+            <label class="chip"><input type="checkbox" name="riesgo" value="emocional"> Emocional / desgaste</label>
+            <label class="chip"><input type="checkbox" name="riesgo" value="otro_riesgo"> Otro</label>
+          </div>
+        </div>
+ 
+        <label class="campo">
+          <span class="campo-label">Si querés, describí brevemente tu contexto actual <em>(opcional)</em></span>
+          <textarea name="contexto_actual" rows="3" placeholder="Lo que sea que quieras que sepamos antes de empezar..."></textarea>
+        </label>
+      </fieldset>
+ 
+      <fieldset class="grupo-preguntas">
+        <legend>Tu historia con procesos de acompañamiento</legend>
+ 
+        <div class="campo">
+          <span class="campo-label">¿Participaste antes en algún proceso de acompañamiento psicosocial o terapéutico?</span>
+          <div class="grid-radio">
+            <label class="chip"><input type="radio" name="participo_antes" value="si"> Sí</label>
+            <label class="chip"><input type="radio" name="participo_antes" value="no"> No</label>
+          </div>
+        </div>
+ 
+        <label class="campo">
+          <span class="campo-label">Si participaste antes, ¿qué te sirvió y qué no? <em>(opcional)</em></span>
+          <textarea name="historial_procesos" rows="3"></textarea>
+        </label>
+ 
+        <label class="campo">
+          <span class="campo-label">¿Tenés alguna práctica de autocuidado que ya usás? <em>(opcional)</em></span>
+          <textarea name="practicas_autocuidado" rows="2" placeholder="Ej: caminar, escribir, alguna rutina, red de apoyo..."></textarea>
+        </label>
+      </fieldset>
+ 
+      <fieldset class="grupo-preguntas">
+        <legend>Expectativas y disponibilidad</legend>
+ 
+        <label class="campo">
+          <span class="campo-label">¿Qué esperás de este proceso de acompañamiento?</span>
+          <textarea name="expectativas" rows="3"></textarea>
+        </label>
+ 
+        <div class="campo">
+          <span class="campo-label">Disponibilidad horaria <em>(marcá los que apliquen)</em></span>
+          <div class="grid-checkbox">
+            <label class="chip"><input type="checkbox" name="disponibilidad" value="manana"> Mañana</label>
+            <label class="chip"><input type="checkbox" name="disponibilidad" value="tarde"> Tarde</label>
+            <label class="chip"><input type="checkbox" name="disponibilidad" value="noche"> Noche</label>
+            <label class="chip"><input type="checkbox" name="disponibilidad" value="finde"> Fin de semana</label>
+          </div>
+        </div>
+ 
+        <div class="campo">
+          <span class="campo-label">Modalidad preferida</span>
+          <div class="grid-radio">
+            <label class="chip"><input type="radio" name="modalidad" value="presencial"> Presencial</label>
+            <label class="chip"><input type="radio" name="modalidad" value="virtual"> Virtual</label>
+            <label class="chip"><input type="radio" name="modalidad" value="mixta"> Mixta</label>
+          </div>
+        </div>
+ 
+        <div class="campo">
+          <span class="campo-label">Frecuencia preferida de encuentros</span>
+          <div class="grid-radio">
+            <label class="chip"><input type="radio" name="frecuencia" value="semanal"> Semanal</label>
+            <label class="chip"><input type="radio" name="frecuencia" value="quincenal"> Quincenal</label>
+            <label class="chip"><input type="radio" name="frecuencia" value="mensual"> Mensual</label>
+          </div>
+        </div>
+      </fieldset>
+ 
+    </form>
+ 
+    <div class="nav-hoja">
+      <button class="btn btn-secundario" id="btn-a-hoja-1-desde-2">← Volver</button>
+      <button class="btn btn-primario" id="btn-a-hoja-3">Continuar a sentir →</button>
+    </div>
+  </section>
+ 
+  <!-- HOJA 3 — GUÍA SOMÁTICA -->
+  <section class="hoja" id="hoja-3" aria-labelledby="titulo-3">
+    <p class="eyebrow">sentir</p>
+    <h1 id="titulo-3">¿Cómo está tu cuerpo hoy?</h1>
+    <p class="texto-intro">
+      Sin diagramas, sin mapas — solo un momento para recorrer tu cuerpo con atención.
+      Para cada zona, movés el nivel de tensión que notás y, si querés, escribís qué
+      aparece ahí.
+    </p>
+ 
+    <div class="zona zona-general">
+      <div class="zona-header">
+        <h3>En general, ahora mismo</h3>
+      </div>
+      <div class="zona-escala">
+        <span class="escala-extremo">en calma</span>
+        <input type="range" min="1" max="5" value="3" class="slider" data-zona="general">
+        <span class="escala-extremo">mucha tensión</span>
+      </div>
+      <textarea class="zona-texto" data-zona="general" rows="2" placeholder="¿Qué notás en tu cuerpo en este momento?"></textarea>
+    </div>
+ 
+    <div class="lista-zonas" id="lista-zonas"></div>
+ 
+    <div class="nav-hoja">
+      <button class="btn btn-secundario" id="btn-a-hoja-2-desde-3">← Volver</button>
+      <button class="btn btn-primario" id="btn-finalizar">Finalizar pre-registro</button>
+    </div>
+  </section>
+ 
+  <!-- HOJA FINAL — CONFIRMACIÓN -->
+  <section class="hoja" id="hoja-final" aria-labelledby="titulo-final">
+    <p class="eyebrow">listo</p>
+    <h1 id="titulo-final">Gracias por compartir esto.</h1>
+    <p class="texto-intro">
+      Tu pre-registro quedó guardado en este dispositivo. Descargalo y compartilo con
+      quien te va a acompañar en el proceso — es la forma en que esta información
+      viaja, sin pasar por ningún servidor.
+    </p>
+    <div class="nav-hoja nav-final">
+      <button class="btn btn-primario" id="btn-descargar">Descargar mi pre-registro</button>
+    </div>
+    <p class="texto-secundario" id="confirmacion-descarga" aria-live="polite"></p>
+  </section>
+ 
+</main>
+ 
+<script src="script.js"></script>
+</body>
+</html>

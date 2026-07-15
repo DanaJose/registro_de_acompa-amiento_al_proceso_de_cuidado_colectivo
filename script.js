@@ -1,0 +1,193 @@
+// ---------------------------------------------------------
+// DATOS: zonas corporales de la guía somática (hoja 3)
+// Cada zona es una tarjeta con escala 1-5 + texto libre.
+// Si querés agregar/quitar zonas, alcanza con editar esta lista.
+// ---------------------------------------------------------
+const ZONAS = [
+  { id: "cabeza", nombre: "Cabeza y mente", placeholder: "Pensamientos, claridad, ruido mental..." },
+  { id: "garganta", nombre: "Garganta y voz", placeholder: "¿Hay algo que cuesta decir o tragar?" },
+  { id: "pecho", nombre: "Pecho y corazón", placeholder: "Respiración, latido, opresión, apertura..." },
+  { id: "estomago", nombre: "Estómago y plexo solar", placeholder: "Nudo, vacío, calma, nervios..." },
+  { id: "espalda", nombre: "Espalda y hombros", placeholder: "Peso, carga, sostén..." },
+  { id: "brazos", nombre: "Brazos y manos", placeholder: "Fuerza, temblor, ganas de actuar o de soltar..." },
+  { id: "piernas", nombre: "Piernas y pies", placeholder: "Apoyo, arraigo, ganas de moverte o de quedarte quieta..." },
+];
+
+// ---------------------------------------------------------
+// ESTADO: acá se va guardando todo lo que la persona completa
+// ---------------------------------------------------------
+const estado = {
+  hojaActual: 1,
+  preguntas: {},
+  somatico: {}
+};
+
+// ---------------------------------------------------------
+// CONSTRUCCIÓN DE LA HOJA 3 a partir de ZONAS
+// ---------------------------------------------------------
+function construirZonas() {
+  const contenedor = document.getElementById("lista-zonas");
+  ZONAS.forEach(zona => {
+    const div = document.createElement("div");
+    div.className = "zona";
+    div.innerHTML = `
+      <div class="zona-header"><h3>${zona.nombre}</h3></div>
+      <div class="zona-escala">
+        <span class="escala-extremo">en calma</span>
+        <input type="range" min="1" max="5" value="3" class="slider" data-zona="${zona.id}">
+        <span class="escala-extremo">mucha tensión</span>
+      </div>
+      <textarea class="zona-texto" data-zona="${zona.id}" rows="2" placeholder="${zona.placeholder}"></textarea>
+    `;
+    contenedor.appendChild(div);
+  });
+}
+
+// ---------------------------------------------------------
+// NAVEGACIÓN ENTRE HOJAS
+// ---------------------------------------------------------
+function irAHoja(numero) {
+  document.querySelectorAll(".hoja").forEach(h => h.classList.remove("activa"));
+
+  const idHoja = numero === 4 ? "hoja-final" : `hoja-${numero}`;
+  document.getElementById(idHoja).classList.add("activa");
+
+  // actualizar puntos de progreso (solo hojas 1-3 tienen punto visible)
+  document.querySelectorAll(".punto").forEach(p => {
+    const n = Number(p.dataset.punto);
+    p.classList.toggle("activo", n === numero);
+    p.classList.toggle("completo", n < numero);
+  });
+
+  estado.hojaActual = numero;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---------------------------------------------------------
+// RECOLECCIÓN DE DATOS
+// ---------------------------------------------------------
+function recolectarPreguntas() {
+  const form = document.getElementById("form-preguntas");
+  const datos = new FormData(form);
+  const resultado = {};
+
+  for (const [clave, valor] of datos.entries()) {
+    if (resultado[clave]) {
+      // campos con múltiples checkboxes (ej: riesgo, disponibilidad)
+      if (Array.isArray(resultado[clave])) {
+        resultado[clave].push(valor);
+      } else {
+        resultado[clave] = [resultado[clave], valor];
+      }
+    } else {
+      resultado[clave] = valor;
+    }
+  }
+  return resultado;
+}
+
+function recolectarSomatico() {
+  const resultado = {};
+  document.querySelectorAll(".slider").forEach(slider => {
+    const zona = slider.dataset.zona;
+    const texto = document.querySelector(`.zona-texto[data-zona="${zona}"]`).value;
+    resultado[zona] = { nivel: Number(slider.value), nota: texto };
+  });
+  return resultado;
+}
+
+// ---------------------------------------------------------
+// GENERAR Y DESCARGAR EL RESUMEN FINAL
+// ---------------------------------------------------------
+function generarResumenTexto() {
+  const p = estado.preguntas;
+  const s = estado.somatico;
+  const fecha = new Date().toLocaleString("es-AR");
+
+  const listar = valor => Array.isArray(valor) ? valor.join(", ") : (valor || "—");
+
+  let texto = `PRE-REGISTRO — PROCESO DE ACOMPAÑAMIENTO PSICOSOCIAL\n`;
+  texto += `Completado el: ${fecha}\n`;
+  texto += `${"=".repeat(50)}\n\n`;
+
+  texto += `-- LABOR COMO DEFENSORA --\n`;
+  texto += `Organización: ${listar(p.organizacion)}\n`;
+  texto += `Tiempo en la labor: ${listar(p.tiempo_labor)}\n`;
+  texto += `Riesgos: ${listar(p.riesgo)}\n`;
+  texto += `Contexto actual: ${listar(p.contexto_actual)}\n\n`;
+
+  texto += `-- HISTORIA CON PROCESOS DE ACOMPAÑAMIENTO --\n`;
+  texto += `¿Participó antes?: ${listar(p.participo_antes)}\n`;
+  texto += `Qué sirvió / no sirvió: ${listar(p.historial_procesos)}\n`;
+  texto += `Prácticas de autocuidado actuales: ${listar(p.practicas_autocuidado)}\n\n`;
+
+  texto += `-- EXPECTATIVAS Y DISPONIBILIDAD --\n`;
+  texto += `Expectativas: ${listar(p.expectativas)}\n`;
+  texto += `Disponibilidad: ${listar(p.disponibilidad)}\n`;
+  texto += `Modalidad preferida: ${listar(p.modalidad)}\n`;
+  texto += `Frecuencia preferida: ${listar(p.frecuencia)}\n\n`;
+
+  texto += `-- GUÍA SOMÁTICA (línea base) --\n`;
+  texto += `General: nivel ${s.general.nivel}/5 — ${s.general.nota || "sin nota"}\n`;
+  ZONAS.forEach(z => {
+    const dato = s[z.id];
+    texto += `${z.nombre}: nivel ${dato.nivel}/5 — ${dato.nota || "sin nota"}\n`;
+  });
+
+  return texto;
+}
+
+function descargarResumen() {
+  const contenido = generarResumenTexto();
+  const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+  const fechaArchivo = new Date().toISOString().slice(0, 10);
+  enlace.href = url;
+  enlace.download = `pre-registro_${fechaArchivo}.txt`;
+  document.body.appendChild(enlace);
+  enlace.click();
+  document.body.removeChild(enlace);
+  URL.revokeObjectURL(url);
+
+  document.getElementById("confirmacion-descarga").textContent =
+    "Descargado. Podés cerrar esta página cuando quieras.";
+}
+
+// ---------------------------------------------------------
+// EVENTOS
+// ---------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  construirZonas();
+
+  // Hoja 1: habilitar avance solo con consentimiento marcado
+  const checkboxConsentimiento = document.getElementById("consentimiento");
+  const btnAHoja2 = document.getElementById("btn-a-hoja-2");
+  const notaConsentimiento = document.getElementById("nota-consentimiento");
+
+  checkboxConsentimiento.addEventListener("change", () => {
+    btnAHoja2.disabled = !checkboxConsentimiento.checked;
+    notaConsentimiento.style.visibility = checkboxConsentimiento.checked ? "hidden" : "visible";
+  });
+
+  btnAHoja2.addEventListener("click", () => irAHoja(2));
+
+  // Hoja 2
+  document.getElementById("btn-a-hoja-1-desde-2").addEventListener("click", () => irAHoja(1));
+  document.getElementById("btn-a-hoja-3").addEventListener("click", () => {
+    estado.preguntas = recolectarPreguntas();
+    irAHoja(3);
+  });
+
+  // Hoja 3
+  document.getElementById("btn-a-hoja-2-desde-3").addEventListener("click", () => irAHoja(2));
+  document.getElementById("btn-finalizar").addEventListener("click", () => {
+    estado.somatico = recolectarSomatico();
+    // por si vuelve a hoja 2 y cambia algo, recolectamos preguntas de nuevo también
+    estado.preguntas = recolectarPreguntas();
+    irAHoja(4);
+  });
+
+  // Hoja final
+  document.getElementById("btn-descargar").addEventListener("click", descargarResumen);
+});
