@@ -4,6 +4,7 @@
 const WORKER_URL = "https://long-heart-1ec8.via-paratodxs.workers.dev";
 
 const LLAVE_PUBLICA = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
 xjMEalgOVBYJKwYBBAHaRw8BAQdAg0xGNOzedu+d5RXHwbDk9IeVI+1Iji+X
 REu+Dh8qKE3NKlZJQSBDb29yZGluYWNpb24gPHZpYS5wYXJhdG9keHNAcHJv
 dG9uLm1lPsLAEwQTFgoAhQWCalgOVAMLCQcJEG2xzJchG0MoRRQAAAAAABwA
