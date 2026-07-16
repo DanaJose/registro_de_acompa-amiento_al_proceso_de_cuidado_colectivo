@@ -1,7 +1,27 @@
 // ---------------------------------------------------------
+// CONFIGURACIÓN DE ENVÍO CIFRADO (opcional)
+// ---------------------------------------------------------
+const WORKER_URL = "https://long-heart-1ec8.via-paratodxs.workers.dev";
+
+const LLAVE_PUBLICA = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+xjMEalgOVBYJKwYBBAHaRw8BAQdAg0xGNOzedu+d5RXHwbDk9IeVI+1Iji+X
+REu+Dh8qKE3NKlZJQSBDb29yZGluYWNpb24gPHZpYS5wYXJhdG9keHNAcHJv
+dG9uLm1lPsLAEwQTFgoAhQWCalgOVAMLCQcJEG2xzJchG0MoRRQAAAAAABwA
+IHNhbHRAbm90YXRpb25zLm9wZW5wZ3Bqcy5vcmdENss10Bxj6kJKqkn0578R
+4LpmlKXVHn1aTnq88j8dTgUVCggODAQWAAIBAhkBApsDAh4BFiEE3Mz98ulk
+nU7lbO18bbHMlyEbQygAAJRZAP9zlqwts8dQQ/VB3C0noAmqbmm/KPBpLAlm
+i09TBbzHqgD/ciGuUf82RuBkBPFomA1VrrilJTDZJxZh0tpuafzSywXOOARq
+WA5UEgorBgEEAZdVAQUBAQdAvEHHWqbp0EnN6FXHm3ZD4epedlg+0h7pDTVC
+qgUCbkQDAQgHwr4EGBYKAHAFgmpYDlQJEG2xzJchG0MoRRQAAAAAABwAIHNh
+bHRAbm90YXRpb25zLm9wZW5wZ3Bqcy5vcmcSHY+DeF5SKNnv4v78sZj1M9kl
+NcQmflcZrCx87xsqfAKbDBYhBNzM/fLpZJ1O5WztfG2xzJchG0MoAAAHyAEA
+0uVQMpKL1S2nlOiw3hKyUzvxUeYiOdlE7sC/QpMeAVMBAKc0sUIbxwo8bs/I
+SlJsvizzy2jjJ7epTODtqDg9GXEF
+=Aajs
+-----END PGP PUBLIC KEY BLOCK-----`;
+
+// ---------------------------------------------------------
 // DATOS: zonas corporales de la guía somática (hoja 3)
-// Cada zona es una tarjeta con escala 1-5 + texto libre.
-// Si querés agregar/quitar zonas, alcanza con editar esta lista.
 // ---------------------------------------------------------
 const ZONAS = [
   { id: "cabeza", nombre: "Cabeza y mente", placeholder: "Pensamientos, claridad, ruido mental..." },
@@ -14,12 +34,13 @@ const ZONAS = [
 ];
 
 // ---------------------------------------------------------
-// ESTADO: acá se va guardando todo lo que la persona completa
+// ESTADO
 // ---------------------------------------------------------
 const estado = {
   hojaActual: 1,
   preguntas: {},
-  somatico: {}
+  somatico: {},
+  envioAceptado: false
 };
 
 // ---------------------------------------------------------
@@ -52,7 +73,6 @@ function irAHoja(numero) {
   const idHoja = numero === 4 ? "hoja-final" : `hoja-${numero}`;
   document.getElementById(idHoja).classList.add("activa");
 
-  // actualizar puntos de progreso (solo hojas 1-3 tienen punto visible)
   document.querySelectorAll(".punto").forEach(p => {
     const n = Number(p.dataset.punto);
     p.classList.toggle("activo", n === numero);
@@ -73,7 +93,6 @@ function recolectarPreguntas() {
 
   for (const [clave, valor] of datos.entries()) {
     if (resultado[clave]) {
-      // campos con múltiples checkboxes (ej: riesgo, disponibilidad)
       if (Array.isArray(resultado[clave])) {
         resultado[clave].push(valor);
       } else {
@@ -97,7 +116,7 @@ function recolectarSomatico() {
 }
 
 // ---------------------------------------------------------
-// GENERAR Y DESCARGAR EL RESUMEN FINAL
+// GENERAR RESUMEN
 // ---------------------------------------------------------
 function generarResumenTexto() {
   const p = estado.preguntas;
@@ -137,8 +156,7 @@ function generarResumenTexto() {
   return texto;
 }
 
-function descargarResumen() {
-  const contenido = generarResumenTexto();
+function descargarResumen(contenido) {
   const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const enlace = document.createElement("a");
@@ -149,9 +167,38 @@ function descargarResumen() {
   enlace.click();
   document.body.removeChild(enlace);
   URL.revokeObjectURL(url);
+}
 
-  document.getElementById("confirmacion-descarga").textContent =
-    "Descargado. Podés cerrar esta página cuando quieras.";
+// ---------------------------------------------------------
+// CIFRADO Y ENVÍO OPCIONAL
+// ---------------------------------------------------------
+async function cifrarTexto(textoPlano) {
+  const publicKey = await openpgp.readKey({ armoredKey: LLAVE_PUBLICA });
+  const mensaje = await openpgp.createMessage({ text: textoPlano });
+
+  const cifrado = await openpgp.encrypt({
+    message: mensaje,
+    encryptionKeys: publicKey,
+  });
+
+  return cifrado;
+}
+
+async function enviarCifrado(textoPlano) {
+  try {
+    const cifrado = await cifrarTexto(textoPlano);
+
+    const respuesta = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensajeCifrado: cifrado }),
+    });
+
+    return respuesta.ok;
+  } catch (error) {
+    console.error("Error al enviar el pre-registro cifrado:", error);
+    return false;
+  }
 }
 
 // ---------------------------------------------------------
@@ -160,8 +207,8 @@ function descargarResumen() {
 document.addEventListener("DOMContentLoaded", () => {
   construirZonas();
 
-  // Hoja 1: habilitar avance solo con consentimiento marcado
   const checkboxConsentimiento = document.getElementById("consentimiento");
+  const checkboxEnvio = document.getElementById("consentimiento-envio");
   const btnAHoja2 = document.getElementById("btn-a-hoja-2");
   const notaConsentimiento = document.getElementById("nota-consentimiento");
 
@@ -170,24 +217,45 @@ document.addEventListener("DOMContentLoaded", () => {
     notaConsentimiento.style.visibility = checkboxConsentimiento.checked ? "hidden" : "visible";
   });
 
+  checkboxEnvio.addEventListener("change", () => {
+    estado.envioAceptado = checkboxEnvio.checked;
+  });
+
   btnAHoja2.addEventListener("click", () => irAHoja(2));
 
-  // Hoja 2
   document.getElementById("btn-a-hoja-1-desde-2").addEventListener("click", () => irAHoja(1));
   document.getElementById("btn-a-hoja-3").addEventListener("click", () => {
     estado.preguntas = recolectarPreguntas();
     irAHoja(3);
   });
 
-  // Hoja 3
   document.getElementById("btn-a-hoja-2-desde-3").addEventListener("click", () => irAHoja(2));
   document.getElementById("btn-finalizar").addEventListener("click", () => {
     estado.somatico = recolectarSomatico();
-    // por si vuelve a hoja 2 y cambia algo, recolectamos preguntas de nuevo también
     estado.preguntas = recolectarPreguntas();
     irAHoja(4);
   });
 
-  // Hoja final
-  document.getElementById("btn-descargar").addEventListener("click", descargarResumen);
+  document.getElementById("btn-descargar").addEventListener("click", async () => {
+    const btnDescargar = document.getElementById("btn-descargar");
+    const confirmacion = document.getElementById("confirmacion-descarga");
+    const contenido = generarResumenTexto();
+
+    btnDescargar.disabled = true;
+    confirmacion.textContent = "Procesando...";
+
+    descargarResumen(contenido);
+
+    if (estado.envioAceptado) {
+      const enviado = await enviarCifrado(contenido);
+      confirmacion.textContent = enviado
+        ? "Descargado y enviado de forma cifrada. Podés cerrar esta página cuando quieras."
+        : "Descargado. Hubo un problema con el envío cifrado — igual conservás tu copia local.";
+    } else {
+      confirmacion.textContent = "Descargado. Podés cerrar esta página cuando quieras.";
+    }
+
+    btnDescargar.disabled = false;
+  });
 });
+

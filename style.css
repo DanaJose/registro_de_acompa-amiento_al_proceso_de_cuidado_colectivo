@@ -41,7 +41,7 @@ h3 { font-size: 1.05rem; margin-bottom: 0.3em; }
 p { line-height: 1.6; }
 
 #header-logo {
-  height: 250px; /* ajusta el tamaño que quieras */
+  height: 100px; /* ajusta el tamaño que quieras */
   width: auto;
   display: block;
   margin: 0 auto;
